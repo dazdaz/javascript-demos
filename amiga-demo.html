@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMIGA 500 - DEMO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* 
+         * SECTION 1: THE AMIGA AESTHETIC 
+         */
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Press Start 2P', cursive; /* The classic pixel font */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        /* 
+         * SECTION 2: THE COPPER BARS (RASTER BARS)
+         * On the Amiga, a custom chip called the "Copper" changed background colors 
+         * per scanline. We simulate this with a massive, repeating linear gradient 
+         * moving vertically behind the content.
+         */
+        .raster-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0%,
+                transparent 40%,
+                rgba(255, 0, 0, 0.5) 42%,
+                rgba(255, 255, 0, 0.8) 45%,
+                rgba(255, 255, 255, 1) 50%,
+                rgba(255, 255, 0, 0.8) 55%,
+                rgba(255, 0, 0, 0.5) 58%,
+                transparent 60%,
+                transparent 100%
+            );
+            background-size: 100% 200vh; /* Twice the height to scroll continuously */
+            animation: copper-move 4s linear infinite;
+        }
+
+        @keyframes copper-move {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 200vh; }
+        }
+
+        /* 
+         * SECTION 3: THE STARFIELD
+         * Pure CSS parallax stars using box-shadows.
+         */
+        .stars {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: transparent;
+            z-index: 0;
+            box-shadow: 
+                10vw 10vh #fff, 20vw 80vh #fff, 30vw 30vh #fff, 40vw 50vh #fff,
+                50vw 90vh #fff, 60vw 20vh #fff, 70vw 60vh #fff, 80vw 10vh #fff,
+                90vw 40vh #fff, 15vw 75vh #fff, 85vw 85vh #fff;
+            animation: star-scroll 10s linear infinite;
+        }
+        .stars-2 {
+            width: 3px; height: 3px;
+            box-shadow: 
+                15vw 15vh #888, 25vw 85vh #888, 35vw 35vh #888, 45vw 55vh #888,
+                55vw 95vh #888, 65vw 25vh #888, 75vw 65vh #888, 85vw 15vh #888;
+            animation: star-scroll 20s linear infinite;
+        }
+
+        @keyframes star-scroll {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-100vh); }
+        }
+
+        /* 
+         * SECTION 4: THE BOUNCING LOGO
+         */
+        .logo-container {
+            z-index: 10;
+            perspective: 500px;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            font-size: clamp(2rem, 8vw, 6rem);
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff 0%, #bbb 50%, #444 51%, #fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* The "Chrome" reflection effect */
+            -webkit-box-reflect: below -10px linear-gradient(transparent, rgba(255,255,255,0.3));
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: rotateX(10deg) translateY(0); }
+            50% { transform: rotateX(-10deg) translateY(-20px); }
+        }
+
+        /* 
+         * SECTION 5: THE SCROLLTEXT (MARQUEE)
+         */
+        .scroller-box {
+            position: fixed;
+            bottom: 10%;
+            width: 100%;
+            height: 60px;
+            background: rgba(0,0,0,0.5);
+            border-top: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            z-index: 20;
+        }
+
+        .scroller-text {
+            white-space: nowrap;
+            font-size: 1.5rem;
+            color: #ff0; /* Classic Amiga Yellow */
+            text-shadow: 2px 2px #f00;
+            animation: scroll-left 15s linear infinite;
+            padding-left: 100vw; /* Start off-screen */
+        }
+
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-200%); }
+        }
+
+        /* Overlay to force user interaction (for audio) */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.5s;
+        }
+        .click-msg {
+            font-size: 1.2rem;
+            animation: blink 0.5s steps(2, start) infinite;
+        }
+        @keyframes blink { to { opacity: 0; } }
+
+        .eq-bars {
+            display: flex;
+            gap: 2px;
+            height: 50px;
+            align-items: flex-end;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 5;
+        }
+        .bar {
+            width: 10px;
+            background: lime;
+            animation: eq 0.5s ease infinite;
+        }
+        .bar:nth-child(odd) { animation-duration: 0.4s; background: yellow; }
+        .bar:nth-child(3n) { animation-duration: 0.7s; background: red; }
+        @keyframes eq { 0%, 100% { height: 5px; } 50% { height: 40px; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- VISUALS -->
+    <div class="stars"></div>
+    <div class="stars-2"></div>
+    <div class="raster-bg"></div>
+
+    <div class="logo-container">
+        <div class="logo">EMEA-AppMod</div>
+    </div>
+
+    <div class="eq-bars" id="visualizer">
+        <!-- Fake equalizer bars generated by JS or CSS -->
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+
+    <div class="scroller-box">
+        <div class="scroller-text">
+            GREETINGS TO: GOOGLE... OPENAI... ANTHROPIC... AND YOU! *** CODE BY YOUR ASSISTANT *** PURE CSS VISUALS *** AUDIO SYNTHESIZED IN REALTIME VIA JAVASCRIPT *** DEMO STYLE NEVER DIES *** AMIGA 500 FOREVER *** PRESS RELOAD TO REBOOT *** 
+        </div>
+    </div>
+
+    <!-- CLICK TO START OVERLAY -->
+    <div class="overlay" id="overlay">
+        <div class="click-msg">INSERT DISK 1 (CLICK TO START)</div>
+    </div>
+
+    <script>
+        // THE AUDIO ENGINE
+        // We use the Web Audio API to build a synthesizer from scratch.
+        
+        const overlay = document.getElementById('overlay');
+        let isPlaying = false;
+        let audioCtx;
+
+        overlay.addEventListener('click', () => {
+            if(isPlaying) return;
+            isPlaying = true;
+            overlay.style.opacity = 0;
+            setTimeout(() => overlay.remove(), 500);
+            
+            initAudio();
+        });
+
+        function initAudio() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+
+            // The BPM and timing
+            const tempo = 125;
+            const secondsPerBeat = 60 / tempo;
+            const noteLength = secondsPerBeat / 4; // 16th notes (Arpeggios)
+
+            // Notes frequencies (C minor pentatonic ish)
+            // C3, Eb3, F3, G3, Bb3, C4...
+            const scale = [
+                130.81, 155.56, 174.61, 196.00, 233.08, 
+                261.63, 311.13, 349.23, 392.00, 466.16, 523.25
+            ];
+
+            let noteIndex = 0;
+
+            // This function plays a single beep
+            function playNote(freq, time, type = 'square', decay = 0.1) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = type;
+                osc.frequency.value = freq;
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                // Envelope (ADSR - minimal)
+                gain.gain.setValueAtTime(0.1, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + decay);
+
+                osc.start(time);
+                osc.stop(time + decay);
+            }
+
+            // The Sequencer
+            let nextNoteTime = audioCtx.currentTime;
+
+            function scheduler() {
+                while (nextNoteTime < audioCtx.currentTime + 0.1) {
+                    scheduleNote(nextNoteTime);
+                    nextNoteTime += noteLength;
+                }
+                requestAnimationFrame(scheduler);
+            }
+
+            // The Composition (The "Pattern")
+            // Generates an arpeggio pattern based on simple math
+            function scheduleNote(time) {
+                // Bassline (every 4th note, lower octave)
+                if (noteIndex % 4 === 0) {
+                    const bassNote = scale[Math.floor((noteIndex % 16) / 4)]; 
+                    playNote(bassNote / 2, time, 'sawtooth', 0.3);
+                }
+
+                // Lead Arpeggio (Fast square waves)
+                // Creates a "rising" pattern that loops
+                let patternIndex = noteIndex % 8; 
+                // Simple algorithmic melody generation
+                let note = scale[patternIndex + (Math.floor(noteIndex/16)%2 * 2)];
+                
+                // Add a little "detune" or variation randomly for chiptune feel
+                if (Math.random() > 0.9) note *= 2; // Octave jump
+
+                playNote(note, time, 'square', 0.15);
+                
+                noteIndex++;
+            }
+
+            scheduler();
+        }
+    </script>
+</body>
+</html>
+
